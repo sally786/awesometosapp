@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function Todo({ todo, updateTodo, deleteTodo }) {
   return (
-    <div key={todo._id} className="todo">
+    <div className="todo">
       <p>{todo.todo}</p>
       <div className="mutations">
         <button
@@ -11,10 +11,7 @@ function Todo({ todo, updateTodo, deleteTodo }) {
         >
           {todo.status ? "☑" : "☐"}
         </button>
-        <button
-          className="todo__delete"
-          onClick={() => deleteTodo(todo._id)}
-        >
+        <button className="todo__delete" onClick={() => deleteTodo(todo._id)}>
           🗑️
         </button>
       </div>
@@ -27,46 +24,67 @@ export default function App() {
 
   useEffect(() => {
     const getTodos = async () => {
-      const res = await fetch("/api/todos");
-      const todos = await res.json();
-      setTodos(todos);
+      try {
+        const res = await fetch("/api/todos");
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const todos = await res.json();
+        setTodos(todos);
+      } catch (error) {
+        console.error("Failed to fetch todos:", error);
+      }
     };
 
     getTodos();
   }, []);
 
   const updateTodo = async (todoId, todoStatus) => {
-    const res = await fetch(`/api/todos/${todoId}`, {
-      method: "PUT",
-      body: JSON.stringify({ status: todoStatus }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const json = await res.json();
+    try {
+      const res = await fetch(`/api/todos/${todoId}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: !todoStatus }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const json = await res.json();
 
-    if (json.acknowledged) {
-      setTodos((currentTodos) =>
-        currentTodos.map((currentTodo) => {
-          if (currentTodo._id === todoId) {
-            return { ...currentTodo, status: !currentTodo.status };
-          }
-          return currentTodo;
-        })
-      );
+      if (json.acknowledged) {
+        setTodos((currentTodos) =>
+          currentTodos.map((currentTodo) => {
+            if (currentTodo._id === todoId) {
+              return { ...currentTodo, status: !currentTodo.status };
+            }
+            return currentTodo;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update todo:", error);
     }
   };
 
   const deleteTodo = async (todoId) => {
-    const res = await fetch(`/api/todos/${todoId}`, {
-      method: "DELETE",
-    });
-    const json = await res.json();
+    try {
+      const res = await fetch(`/api/todos/${todoId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const json = await res.json();
 
-    if (json.acknowledged) {
-      setTodos((currentTodos) =>
-        currentTodos.filter((currentTodo) => currentTodo._id !== todoId)
-      );
+      if (json.acknowledged) {
+        setTodos((currentTodos) =>
+          currentTodos.filter((currentTodo) => currentTodo._id !== todoId)
+        );
+      }
+    } catch (error) {
+      console.error("Failed to delete todo:", error);
     }
   };
 
