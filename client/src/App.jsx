@@ -25,7 +25,7 @@ export default function App() {
   useEffect(() => {
     const getTodos = async () => {
       try {
-        const res = await fetch("https://awesometosapp.vercel.app/");
+        const res = await fetch("https://awesometosapp.vercel.app/api/todos");
         if (!res.ok) {
           throw new Error("Network response was not ok");
         }
@@ -41,7 +41,7 @@ export default function App() {
 
   const updateTodo = async (todoId, todoStatus) => {
     try {
-      const res = await fetch(`/api/todos/${todoId}`, {
+      const res = await fetch(`https://awesometosapp.vercel.app/api/todos/${todoId}`, {
         method: "PUT",
         body: JSON.stringify({ status: !todoStatus }),
         headers: {
@@ -70,7 +70,7 @@ export default function App() {
 
   const deleteTodo = async (todoId) => {
     try {
-      const res = await fetch(`/api/todos/${todoId}`, {
+      const res = await fetch(`https://awesometosapp.vercel.app/api/todos/${todoId}`, {
         method: "DELETE",
       });
       if (!res.ok) {
