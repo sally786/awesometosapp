@@ -8,22 +8,28 @@ const options = {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 };
 
 let client;
 const connectToMongoDB = async () => {
   if (!client) {
     try {
-      client = await MongoClient.connect(uri, options);
+      client = new MongoClient(uri, options);
+      await client.connect();
       console.log("Connected to MongoDB");
     } catch (error) {
-      console.log(error);
+      console.error("Failed to connect to MongoDB", error);
     }
   }
   return client;
 };
 
-const getConnectedClient = () => client;
+const getConnectedClient = () => {
+  if (!client) {
+    throw new Error("MongoDB client is not connected. Call connectToMongoDB first.");
+  }
+  return client;
+};
 
 module.exports = { connectToMongoDB, getConnectedClient };

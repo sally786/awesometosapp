@@ -6,46 +6,56 @@ const { ObjectId } = require("mongodb");
 
 // GET /todos
 router.get("/todos", async (req, res) => {
-    const collection = getCollection();
+  try {
+    const collection = await getCollection();
     const todos = await collection.find({}).toArray();
-
     res.status(200).json(todos);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch todos' });
+  }
 });
 
 // POST /todos
 router.post("/todos", async (req, res) => {
-    const collection = getCollection();
+  try {
+    const collection = await getCollection();
     let { todo } = req.body;
-
     todo = JSON.stringify(todo);
-  
     const newTodo = await collection.insertOne({ todo, status: false });
-  
     res.status(201).json({ todo, status: false, _id: newTodo.insertedId });
-  })
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create todo' });
+  }
+});
 
 // DELETE /todos/:id
 router.delete("/todos/:id", async (req, res) => {
-    const collection = getCollection();
+  try {
+    const collection = await getCollection();
     const _id = new ObjectId(req.params.id);
-  
     const deletedTodo = await collection.deleteOne({ _id });
     res.status(200).json(deletedTodo);
-  })
-
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete todo' });
+  }
+});
 
 // PUT /todos/:id
 router.put("/todos/:id", async (req, res) => {
-    const collection = getCollection();
+  try {
+    const collection = await getCollection();
     const _id = new ObjectId(req.params.id);
     const { status } = req.body;
 
     if (typeof status !== "boolean") {
-        return res.status(400).json({ mssg: "invalid status" });
+      return res.status(400).json({ mssg: "invalid status" });
     }
-  
+
     const updatedTodo = await collection.updateOne({ _id }, { $set: { status: !status } });
     res.status(200).json(updatedTodo);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update todo' });
+  }
+});
 
 module.exports = router;
