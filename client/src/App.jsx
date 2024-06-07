@@ -25,7 +25,7 @@ export default function App() {
   useEffect(() => {
     const getTodos = async () => {
       try {
-        const res = await fetch("/api/todos");
+        const res = await fetch("https://awesometosapp-9lga0qgw6-sallys-projects-d917aaa0.vercel.app/");
         if (!res.ok) {
           throw new Error("Network response was not ok");
         }
