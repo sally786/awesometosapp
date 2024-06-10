@@ -34,16 +34,6 @@ app.post("/api/tasks", async (req, res) => {
   }
 });
 
-app.get("/api/tasks", async (req, res) => {
-  try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching tasks" });
-  }
-});
-
 app.use(express.static(path.join(__dirname, 'build')));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
