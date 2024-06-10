@@ -12,11 +12,22 @@ function TodoList() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: newTask }),
       });
-      const newTaskData = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      // Handle empty response
+      const responseText = await response.text();
+      if (!responseText) {
+        throw new Error('Response is empty');
+      }
+  
+      const newTaskData = JSON.parse(responseText);
       setTasks([...tasks, newTaskData]);
       setNewTask('');
     } catch (error) {
-      console.error(error);
+      console.error('Error adding task:', error);
     }
   };
 
@@ -131,7 +142,6 @@ function App() {
 
   return (
     <div>
-      <h1>Todo App</h1>
       <TodoList />
       <ul>
         {todos.map((todo) => (
