@@ -1,4 +1,45 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+
+function TodoList() {
+  const [newTask, setNewTask] = useState('');
+  const [tasks, setTasks] = useState([]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: newTask }),
+      });
+      const newTaskData = await response.json();
+      setTasks([...tasks, newTaskData]);
+      setNewTask('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Todo List</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={newTask}
+          onChange={(event) => setNewTask(event.target.value)}
+          placeholder="Enter new task"
+        />
+        <button type="submit">Add Task</button>
+      </form>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task._id}>{task.task}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function Todo({ todo, updateTodo, deleteTodo }) {
   return (
@@ -9,7 +50,7 @@ function Todo({ todo, updateTodo, deleteTodo }) {
           className="todo__status"
           onClick={() => updateTodo(todo._id, todo.status)}
         >
-          {todo.status ? "☑" : "☐"}
+          {todo.status? "☑" : "☐"}
         </button>
         <button className="todo__delete" onClick={() => deleteTodo(todo._id)}>
           🗑️
@@ -19,13 +60,13 @@ function Todo({ todo, updateTodo, deleteTodo }) {
   );
 }
 
-export default function App() {
+function App() {
   const [todos, setTodos] = useState([]);
 
   useEffect(() => {
     const getTodos = async () => {
       try {
-        const res = await fetch("https://awesometosapp.vercel.app/api/todos");
+        const res = await fetch("/api/todos");
         if (!res.ok) {
           throw new Error("Network response was not ok");
         }
@@ -41,9 +82,9 @@ export default function App() {
 
   const updateTodo = async (todoId, todoStatus) => {
     try {
-      const res = await fetch(`https://awesometosapp.vercel.app/api/todos/${todoId}`, {
+      const res = await fetch(`/api/todos/${todoId}`, {
         method: "PUT",
-        body: JSON.stringify({ status: !todoStatus }),
+        body: JSON.stringify({ status:!todoStatus }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -57,7 +98,7 @@ export default function App() {
         setTodos((currentTodos) =>
           currentTodos.map((currentTodo) => {
             if (currentTodo._id === todoId) {
-              return { ...currentTodo, status: !currentTodo.status };
+              return {...currentTodo, status:!currentTodo.status };
             }
             return currentTodo;
           })
@@ -70,7 +111,7 @@ export default function App() {
 
   const deleteTodo = async (todoId) => {
     try {
-      const res = await fetch(`https://awesometosapp.vercel.app/api/todos/${todoId}`, {
+      const res = await fetch(`/api/todos/${todoId}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -80,7 +121,7 @@ export default function App() {
 
       if (json.acknowledged) {
         setTodos((currentTodos) =>
-          currentTodos.filter((currentTodo) => currentTodo._id !== todoId)
+          currentTodos.filter((currentTodo) => currentTodo._id!== todoId)
         );
       }
     } catch (error) {
@@ -89,14 +130,16 @@ export default function App() {
   };
 
   return (
-    <main className="container">
-      <h1 className="title">Awesome Todos</h1>
-      <div className="todos">
-        {todos.length > 0 &&
-          todos.map((todo) => (
-            <Todo key={todo._id} todo={todo} updateTodo={updateTodo} deleteTodo={deleteTodo} />
-          ))}
-      </div>
-    </main>
+    <div>
+      <h1>Todo App</h1>
+      <TodoList />
+      <ul>
+        {todos.map((todo) => (
+          <Todo key={todo._id} todo={todo} updateTodo={updateTodo} deleteTodo={deleteTodo} />
+        ))}
+      </ul>
+    </div>
   );
 }
+
+export default App;
